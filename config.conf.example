@@ -1,0 +1,25 @@
+# sparkcli configuration
+# Copy to ~/.sparkcli/config.conf and adjust for your setup.
+# Run 'sparkcli doctor' to verify your configuration.
+
+# Host-side HuggingFace cache directory.
+# Files here are owned by root (written by Docker) — don't change this
+# unless you know what you're doing; mismatched ownership breaks vLLM.
+SPARKCLI_HF_CACHE=~/.cache/huggingface
+
+# Docker image to use for vLLM (must have huggingface-cli + vLLM installed).
+# Default is the custom Spark image built by ~/homelab/docker/vllm/.
+# Run 'sparkcli update' to rebuild it.
+SPARKCLI_VLLM_IMAGE=sparky-vllm:26.02
+
+# Port vLLM listens on (host-side). OpenWebUI should point here.
+SPARKCLI_PORT=8000
+
+# GPU memory fraction vLLM may use. 0.80 leaves headroom for the OS.
+# On a DGX Spark with 128GB unified memory you can push this to 0.90+
+# if you're running large models.
+SPARKCLI_GPU_UTIL=0.80
+
+# Optional: HuggingFace token for gated models.
+# Can also be set as HF_TOKEN or HUGGING_FACE_HUB_TOKEN in the environment.
+# HF_TOKEN=hf_...
