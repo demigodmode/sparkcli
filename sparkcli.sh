@@ -449,12 +449,10 @@ cmd_doctor() {
   fi
 
   # HF cache directory
-  if [ -d "$SPARKCLI_HF_CACHE" ] && [ -w "$SPARKCLI_HF_CACHE" ]; then
-    check "HF cache dir exists and writable" pass
-  elif [ ! -d "$SPARKCLI_HF_CACHE" ]; then
-    check "HF cache dir exists and writable" warn "mkdir -p ${SPARKCLI_HF_CACHE}"
+  if [ -d "$SPARKCLI_HF_CACHE" ]; then
+    check "HF cache dir exists (${SPARKCLI_HF_CACHE})" pass
   else
-    check "HF cache dir exists and writable" fail "Check permissions on ${SPARKCLI_HF_CACHE}"
+    check "HF cache dir exists (${SPARKCLI_HF_CACHE})" warn "mkdir -p ${SPARKCLI_HF_CACHE}"
   fi
 
   # Port availability
