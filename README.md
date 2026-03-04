@@ -9,7 +9,7 @@ sparkcli ls
 sparkcli stop
 ```
 
-Ollama runs on Spark but leaves a lot of the hardware on the table (GGUF only, no FP4 tensor cores, no continuous batching). vLLM uses the hardware properly but gives you nothing for model management. sparkcli fills that part: pull models, switch between them, check what's running, without touching Docker flags each time.
+Ollama runs on Spark but can't take full advantage of the hardware. vLLM can, but it has no model management. sparkcli adds that part on top of vLLM.
 
 The API is OpenAI-compatible (it's just vLLM), so anything pointed at OpenAI works against it.
 
@@ -51,7 +51,7 @@ Only models listed in `models.conf` are supported. Each entry includes the corre
 
 Currently Qwen3 variants tested on DGX Spark. More coming.
 
-To add a model, open an issue using the **New Model** template. If you've tested it yourself, include the curl output so it can be merged faster.
+To add a model, [open a New Model request](https://github.com/demigodmode/sparkcli/issues/new?template=new-model.yml). If you've tested it yourself, include the curl output so it can be merged faster.
 
 ## Requirements
 
