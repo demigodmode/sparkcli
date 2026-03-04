@@ -212,7 +212,7 @@ Use 'sparkcli ls' to see registered models."
     --name "$CONTAINER_NAME"
     --restart always
     --runtime nvidia
-    --ipc host
+    # --ipc host removed: not needed on single GB10; add back if multi-node NCCL ever becomes relevant
     --gpus all
     -v "${SPARKCLI_HF_CACHE}:/root/.cache/huggingface"
     -p "${SPARKCLI_PORT}:8000"
@@ -221,6 +221,7 @@ Use 'sparkcli ls' to see registered models."
     python3 -m vllm.entrypoints.openai.api_server
     --model "$model_id"
     --max-model-len "$max_model_len"
+    --host 0.0.0.0
     --enforce-eager
     --no-async-scheduling
     --gpu-memory-utilization "${SPARKCLI_GPU_UTIL}"
@@ -381,7 +382,7 @@ cmd_info() {
   [ -n "$comment" ] && echo "  Note:          ${YELLOW}${comment}${RESET}"
   printf "  %-16s %s\n" "Max context:"  "${max_model_len} tokens"
   printf "  %-16s %s\n" "Extra flags:"  "$extra_flags"
-  printf "  %-16s %s\n" "Base flags:"   "--enforce-eager --no-async-scheduling --gpu-memory-utilization ${SPARKCLI_GPU_UTIL}"
+  printf "  %-16s %s\n" "Base flags:"   "--host 0.0.0.0 --enforce-eager --no-async-scheduling --gpu-memory-utilization ${SPARKCLI_GPU_UTIL}"
 
   local model_path
   model_path="$(hf_model_path "$model_id")"
