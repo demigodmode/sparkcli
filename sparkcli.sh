@@ -237,7 +237,6 @@ Use 'sparkcli ls' to see registered models."
   docker "${docker_args[@]}"
 
   wait_for_ready
-  echo ""
   ok "Serving ${model_id} on http://localhost:${SPARKCLI_PORT}"
 }
 
