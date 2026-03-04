@@ -10,15 +10,13 @@ body:
     validations:
       required: true
 
-  - type: dropdown
+  - type: checkboxes
     id: tested
     attributes:
-      label: Did you test this yourself?
+      label: Submission type
       options:
-        - "Yes — I ran it and it works"
-        - "No — requesting someone else test it"
-    validations:
-      required: true
+        - label: I tested this myself and it works
+        - label: Requesting someone else test this
 
   - type: input
     id: hardware
@@ -32,7 +30,8 @@ body:
     attributes:
       label: curl output
       description: Paste the output of `curl http://localhost:8000/v1/models`
-      render: json
+      placeholder: |
+        {"object":"list","data":[{"id":"Qwen/Qwen3-32B-FP8",...}]}
 
   - type: textarea
     id: flags
