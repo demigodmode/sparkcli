@@ -5,7 +5,7 @@ set -euo pipefail
 
 # ── Paths ─────────────────────────────────────────────────────────────────────
 CONFIG_FILE="${HOME}/.sparkcli/config.conf"
-SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+SCRIPT_DIR="$(cd "$(dirname "$(readlink -f "${BASH_SOURCE[0]}")")" && pwd)"
 MODELS_CONF="${SCRIPT_DIR}/models.conf"
 CONTAINER_NAME=vllm
 
