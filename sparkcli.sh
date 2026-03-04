@@ -14,6 +14,7 @@ SPARKCLI_HF_CACHE="${HOME}/.cache/huggingface"
 SPARKCLI_VLLM_IMAGE=sparky-vllm:26.02
 SPARKCLI_PORT=8000
 SPARKCLI_GPU_UTIL=0.80
+SPARKCLI_VLLM_BUILD_DIR=""
 
 # Load user config
 if [ -f "$CONFIG_FILE" ]; then
@@ -339,9 +340,10 @@ cmd_logs() {
 }
 
 cmd_update() {
-  local vllm_dir="${HOME}/homelab/docker/vllm"
-  [ -d "$vllm_dir" ] || die "vLLM build directory not found: ${vllm_dir}
-  Expected: ~/homelab/docker/vllm/"
+  [ -n "$SPARKCLI_VLLM_BUILD_DIR" ] || die "SPARKCLI_VLLM_BUILD_DIR is not set.
+Set it in ~/.sparkcli/config.conf to point at your vLLM Dockerfile directory."
+  local vllm_dir="${SPARKCLI_VLLM_BUILD_DIR/#\~/$HOME}"
+  [ -d "$vllm_dir" ] || die "vLLM build directory not found: ${vllm_dir}"
 
   # Capture running model before rebuild
   local current_model=""

@@ -8,9 +8,11 @@
 SPARKCLI_HF_CACHE=~/.cache/huggingface
 
 # Docker image to use for vLLM (must have huggingface-cli + vLLM installed).
-# Default is the custom Spark image built by ~/homelab/docker/vllm/.
-# Run 'sparkcli update' to rebuild it.
 SPARKCLI_VLLM_IMAGE=sparky-vllm:26.02
+
+# Path to the directory containing your vLLM Dockerfile.
+# Required only if you use 'sparkcli update' to rebuild the image.
+# SPARKCLI_VLLM_BUILD_DIR=~/homelab/docker/vllm
 
 # Port vLLM listens on (host-side). OpenWebUI should point here.
 SPARKCLI_PORT=8000
