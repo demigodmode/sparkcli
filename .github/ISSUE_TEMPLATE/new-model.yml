@@ -40,3 +40,10 @@ body:
     attributes:
       label: Extra flags
       description: Any vLLM flags you needed beyond the defaults (e.g. --reasoning-parser, --tool-call-parser). Leave blank if none.
+
+  - type: input
+    id: docker_env
+    attributes:
+      label: Docker env vars
+      description: Only needed for MoE models. Space-separated KEY=VALUE pairs passed to docker run (e.g. VLLM_FLASHINFER_MOE_BACKEND=latency). Leave blank if none.
+      placeholder: VLLM_FLASHINFER_MOE_BACKEND=latency

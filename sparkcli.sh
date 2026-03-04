@@ -7,6 +7,7 @@ set -euo pipefail
 CONFIG_FILE="${HOME}/.sparkcli/config.conf"
 SCRIPT_DIR="$(cd "$(dirname "$(readlink -f "${BASH_SOURCE[0]}")")" && pwd)"
 MODELS_CONF="${SCRIPT_DIR}/models.conf"
+DOCKER_ENV_CONF="${SCRIPT_DIR}/docker_env.conf"
 CONTAINER_NAME=vllm
 
 # ── Defaults (overridden by config) ───────────────────────────────────────────
@@ -54,6 +55,21 @@ lookup_model() {
       return 0
     fi
   done < <(grep -v '^\s*#' "$MODELS_CONF" | grep -v '^\s*$')
+}
+
+# Look up model-specific docker env vars from docker_env.conf.
+# Outputs space-separated KEY=VALUE pairs, or empty string if none.
+lookup_docker_env() {
+  local target="$1"
+  [ -f "$DOCKER_ENV_CONF" ] || return 0
+  while IFS='|' read -r id env_vars; do
+    id="$(echo "$id" | xargs 2>/dev/null || echo "$id" | tr -d '[:space:]')"
+    [[ -z "$id" || "$id" == \#* ]] && continue
+    if [ "$id" = "$target" ]; then
+      echo "$env_vars" | sed 's/^[[:space:]]*//' | sed 's/[[:space:]]*$//'
+      return 0
+    fi
+  done < <(grep -v '^\s*#' "$DOCKER_ENV_CONF" | grep -v '^\s*$')
 }
 
 # Get the inline comment (if any) for a model in models.conf.
@@ -196,6 +212,9 @@ Use 'sparkcli ls' to see registered models."
   local max_model_len extra_flags
   IFS='|' read -r _ max_model_len extra_flags <<< "$entry"
 
+  local docker_env
+  docker_env="$(lookup_docker_env "$model_id")"
+
   if ! is_downloaded "$model_id"; then
     warn "Model not in cache. Pulling first..."
     cmd_pull "$model_id"
@@ -227,6 +246,15 @@ Use 'sparkcli ls' to see registered models."
     --gpu-memory-utilization "${SPARKCLI_GPU_UTIL}"
     --port 8000
   )
+
+  # Inject model-specific docker env vars from docker_env.conf
+  if [ -n "$docker_env" ]; then
+    local env_arr=()
+    read -ra env_arr <<< "$docker_env"
+    for env_var in "${env_arr[@]}"; do
+      docker_args+=(-e "$env_var")
+    done
+  fi
 
   # Append extra flags from models.conf (safe array expansion)
   if [ -n "$extra_flags" ]; then
@@ -378,11 +406,15 @@ cmd_info() {
   local comment
   comment="$(model_comment "$model_id")"
 
+  local docker_env
+  docker_env="$(lookup_docker_env "$model_id")"
+
   echo -e "${BOLD}${model_id}${RESET}"
   [ -n "$comment" ] && echo "  Note:          ${YELLOW}${comment}${RESET}"
   printf "  %-16s %s\n" "Max context:"  "${max_model_len} tokens"
   printf "  %-16s %s\n" "Extra flags:"  "$extra_flags"
   printf "  %-16s %s\n" "Base flags:"   "--host 0.0.0.0 --enforce-eager --no-async-scheduling --gpu-memory-utilization ${SPARKCLI_GPU_UTIL}"
+  [ -n "$docker_env" ] && printf "  %-16s %s\n" "Docker env:"   "$docker_env"
 
   local model_path
   model_path="$(hf_model_path "$model_id")"
