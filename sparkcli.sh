@@ -72,7 +72,7 @@ model_comment() {
 }
 
 # Convert model_id (org/name) to the HF hub cache directory name.
-hf_dir_name() { echo "models--$(echo "$1" | tr '/' '--')"; }
+hf_dir_name() { echo "models--$(echo "$1" | sed 's|/|--|g')"; }
 
 hf_model_path() { echo "${SPARKCLI_HF_CACHE}/hub/$(hf_dir_name "$1")"; }
 
@@ -457,20 +457,15 @@ cmd_doctor() {
   fi
 
   # Port availability
-  local port_pid=""
-  port_pid="$(ss -tlnp "sport = :${SPARKCLI_PORT}" 2>/dev/null \
-    | grep -oP 'pid=\K[0-9]+' | head -1 || true)"
-  if [ -z "$port_pid" ]; then
+  local port_in_use=""
+  port_in_use="$(ss -tlnp "sport = :${SPARKCLI_PORT}" 2>/dev/null | grep -c "LISTEN" || true)"
+  if [ "${port_in_use:-0}" -eq 0 ]; then
     check "Port ${SPARKCLI_PORT} available" pass
+  elif container_running 2>/dev/null; then
+    check "Port ${SPARKCLI_PORT} (in use by vLLM)" pass
   else
-    local port_proc
-    port_proc="$(ps -p "$port_pid" -o comm= 2>/dev/null || echo "unknown")"
-    if container_running 2>/dev/null || [[ "$port_proc" == *python* ]]; then
-      check "Port ${SPARKCLI_PORT} (in use by vLLM)" pass
-    else
-      check "Port ${SPARKCLI_PORT} available" warn \
-        "Port occupied by PID ${port_pid} (${port_proc})"
-    fi
+    check "Port ${SPARKCLI_PORT} available" warn \
+      "Port in use by another process"
   fi
 
   # Config file
